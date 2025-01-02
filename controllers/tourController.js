@@ -24,13 +24,13 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     results: tours.length,
-    data: tours ,
+    data: tours,
   });
 });
 
 exports.getTour = catchAsync(async (req, res, next) => {
   // await Tour.findOne({_id: req.params.id})
-  const tour = await Tour.findById(req.params.id);
+  const tour = await Tour.findById(req.params.id).populate('reviews');
 
   if (!tour) {
     return next(new AppError('Cant find the tour with this ID', 404));
@@ -79,7 +79,7 @@ exports.deleteTour = catchAsync(async (req, res, next) => {
   if (!tour) {
     return next(new AppError('Cant find the tour with this ID', 404));
   }
-  
+
   res.status(204).json({
     status: 'success',
     message: null,
