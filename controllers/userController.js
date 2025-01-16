@@ -1,6 +1,13 @@
 const userModel = require('../models/userModel');
 const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
+const {
+  deleteOne,
+  updateOne,
+  createOne,
+  getAll,
+  getOne,
+} = require('../utils/factoryFunction');
 
 const filteredFields = (obj, ...allowedFields) => {
   const newObject = {};
@@ -13,30 +20,12 @@ const filteredFields = (obj, ...allowedFields) => {
   return newObject;
 };
 
-exports.getAllUsers = catchAsync(async (req, res) => {
-  const users = await userModel.find();
+exports.getAllUsers = getAll(userModel, 'user');
 
-  // Send response
-  res.status(200).json({
-    status: 'success',
-    results: users.length,
-    data: users,
-  });
-});
+exports.getUser = getOne(userModel);
 
-exports.getUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not defined',
-  });
-};
-
-exports.createUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not defined',
-  });
-};
+// Admin Only
+exports.createUser = createOne(userModel, 'user');
 
 exports.updateMe = catchAsync(async (req, res, next) => {
   // If user tries to update the password, error
@@ -47,41 +36,39 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   // Filter out the unwanted fields
   const filterBody = filteredFields(req.body, 'name', 'email');
 
-  
   // Update the user's data
-  const currentUser = await userModel.findByIdAndUpdate(req.user.id, filterBody, {
-    runValidators: true,
-    new: true
-  })
-  
+  const currentUser = await userModel.findByIdAndUpdate(
+    req.user.id,
+    filterBody,
+    {
+      runValidators: true,
+      new: true,
+    },
+  );
+
   res.status(200).json({
     status: 'success',
     data: {
-      user: currentUser
-    }
+      user: currentUser,
+    },
   });
-
 });
 
-exports.updateUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not defined',
-  });
-};
+// Do not use this API to update user's password
+exports.updateUser = updateOne(userModel, 'user');
 
 exports.deleteMe = catchAsync(async (req, res, next) => {
-  await userModel.findByIdAndUpdate(req.user.id, {active: false})
+  await userModel.findByIdAndUpdate(req.user.id, { active: false });
 
   res.status(204).json({
     status: 'success',
-    data: null
-  })
-})
-
-exports.deleteUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not defined',
+    data: null,
   });
-};
+});
+
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next()
+}
+
+exports.deleteUser = deleteOne(userModel);

@@ -15,7 +15,7 @@ const signToken = (id) => {
 
 const createAndSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
-  
+
   const cookieOption = {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
@@ -24,7 +24,7 @@ const createAndSendToken = (user, statusCode, res) => {
   };
 
   if (process.env.NODE_ENV === 'production') {
-    cookieOption.secure = true
+    cookieOption.secure = true;
   }
   res.cookie('jwt', token, cookieOption);
 
@@ -112,7 +112,6 @@ exports.restrictedTo = (...roles) => {
     if (!roles.includes(req.user.role)) {
       return next(new AppError('You do not have permission', 403));
     }
-
     next();
   };
 };
@@ -205,3 +204,24 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   // 4, log the user in + send JWT token
   createAndSendToken(currentUser, 201, res);
 });
+
+exports.ownerCheck = ({ model, ownerFields }, ...roles) =>
+  catchAsync(async (req, res, next) => {
+    const currentDoc = await model.findById(req.params.id);
+
+    if (!currentDoc) {
+      return next(new AppError('Document not found', 404));
+    }
+
+    const ownerId = currentDoc[ownerFields]._id || currentDoc[ownerFields];
+
+    if (!ownerId) {
+      return next(new AppError('Cannot find the owner', 403));
+    }
+
+    if (ownerId !== req.user.id && !roles.includes(req.user.role)) {
+      return next(new AppError('Permission denied'));
+    }
+
+    next();
+  });

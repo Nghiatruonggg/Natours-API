@@ -123,6 +123,10 @@ tourSchema.virtual('reviews', {
 
 
 // Document middleware: runs before .save() and create()
+// tourSchema.index({price: 1})
+tourSchema.index({price: 1, ratingsAverage: -1});
+tourSchema.index({slug: 1})
+
 tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
