@@ -8,6 +8,8 @@ const {
   aliasTopTours,
   getTourStats,
   getMonthlyPlan,
+  getToursWithin,
+  getDistance
 } = require('../controllers/tourController');
 const { protected, restrictedTo } = require('../controllers/authController');
 const reviewRouter = require('./reviewRoutes');
@@ -18,6 +20,11 @@ const router = express.Router();
 router.use('/:tourId/reviews', reviewRouter);
 
 router.route('/top-5-cheap').get(aliasTopTours, getAllTours);
+
+// Search Query Params: /tours-within?distance=200&center=40,45&unit=miles
+router.get('/tours-within/:distance/center/:latlng/unit/:unit', getToursWithin);
+
+router.get('/distance/:latlng/unit/:unit', getDistance);
 
 router.route('/tours-stats').get(getTourStats);
 router

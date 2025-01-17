@@ -1,20 +1,20 @@
 const express = require('express');
 const {
-  getAllUsers,
-  createUser,
-  getUser,
-  updateUser,
-  deleteUser,
-  updateMe,
-  deleteMe,
-  getMe,
+    getAllUsers,
+    createUser,
+    getUser,
+    updateUser,
+    deleteUser,
+    updateMe,
+    deleteMe,
+    getMe
 } = require('../controllers/userController');
 const {
-  protected,
-  forgotPassword,
-  resetPassword,
-  updatePassword,
-  restrictedTo,
+    protected,
+    forgotPassword,
+    resetPassword,
+    updatePassword,
+    restrictedTo
 } = require('../controllers/authController');
 const { signUp, logIn } = require('../controllers/authController');
 

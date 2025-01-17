@@ -1,11 +1,12 @@
 const Tour = require('../models/tourModel');
+const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
 const {
   deleteOne,
   updateOne,
   createOne,
   getOne,
-  getAll,
+  getAll
 } = require('../utils/factoryFunction');
 
 exports.aliasTopTours = (req, res, next) => {
@@ -24,32 +25,32 @@ exports.deleteTour = deleteOne(Tour);
 exports.getTourStats = catchAsync(async (req, res, next) => {
   const stats = await Tour.aggregate([
     {
-      $match: { ratingsAverage: { $gte: 4.5 } },
+      $match: { ratingsAverage: { $gte: 4.5 } }
     },
     {
       $group: {
         _id: '$difficulty',
         num: {
-          $sum: 1,
+          $sum: 1
         },
         numRatings: {
-          $sum: '$ratingsQuantity',
+          $sum: '$ratingsQuantity'
         },
         avgRating: {
-          $avg: '$ratingsAverage',
+          $avg: '$ratingsAverage'
         },
         avgPrice: {
-          $avg: '$price',
+          $avg: '$price'
         },
         minPrice: { $min: '$price' },
-        maxPrice: { $max: '$price' },
-      },
+        maxPrice: { $max: '$price' }
+      }
     },
     {
       $sort: {
-        avgPrice: 1,
-      },
-    },
+        avgPrice: 1
+      }
+    }
     // {
     //   $match: { _id: { $ne: 'easy' } },
     // },
@@ -58,8 +59,8 @@ exports.getTourStats = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     data: {
-      stats: stats,
-    },
+      stats: stats
+    }
   });
 });
 
@@ -67,48 +68,120 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
   const year = req.params.year * 1; // 2021
   const plan = await Tour.aggregate([
     {
-      $unwind: '$startDates',
+      $unwind: '$startDates'
     },
     {
       $match: {
         startDates: {
           $gte: new Date(`${year}-01-01`),
-          $lte: new Date(`${year}-12-31`),
-        },
-      },
+          $lte: new Date(`${year}-12-31`)
+        }
+      }
     },
     {
       $group: {
         _id: {
-          $month: '$startDates',
+          $month: '$startDates'
         },
         numTourStarts: { $sum: 1 },
         tours: {
-          $push: '$name',
-        },
-      },
+          $push: '$name'
+        }
+      }
     },
     {
-      $addFields: { month: '$_id' },
+      $addFields: { month: '$_id' }
     },
     {
       $project: {
-        _id: 0,
-      },
+        _id: 0
+      }
     },
     {
       $sort: {
-        numTourStarts: -1,
-      },
+        numTourStarts: -1
+      }
     },
     {
-      $limit: 12,
-    },
+      $limit: 12
+    }
   ]);
   res.status(200).json({
     status: 'success',
     data: {
-      plan,
+      plan
+    }
+  });
+});
+
+// /tours-within/233/center/34.023454,-118.333504/unit/mi
+
+exports.getToursWithin = catchAsync(async (req, res, next) => {
+  const { distance, latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+
+  if (!lat || !lng)
+    return next(
+      new AppError(
+        'Please provide latitude and longtitude for the location',
+        400
+      )
+    );
+
+  const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
+
+  console.log(distance, lat, lng, unit);
+
+  const tours = await Tour.find({
+    startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } }
+  });
+
+  res.status(200).json({
+    status: 'success',
+    results: tours.length,
+    data: {
+      data: tours
+    }
+  });
+});
+
+exports.getDistance = catchAsync(async (req, res, next) => {
+  const { latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+
+  const multiplier = unit === 'mi' ? 0.0006213712 : 0.001;
+
+  if (!lat || !lng)
+    return next(
+      new AppError(
+        'Please provide latitude and longtitude for the location',
+        400
+      )
+    );
+
+  const distance = await Tour.aggregate([
+    {
+      $geoNear: {
+        near: {
+          type: 'Point',
+          coordinates: [lng * 1, lat * 1]
+        },
+        distanceField: 'distance',
+        distanceMultiplier: multiplier
+      }
     },
+    {
+      $project: {
+        distance: 1,
+        name: 1
+      }
+    }
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      data: distance
+    }
   });
 });

@@ -220,7 +220,7 @@ exports.ownerCheck = ({ model, ownerFields }, ...roles) =>
     }
 
     if (ownerId !== req.user.id && !roles.includes(req.user.role)) {
-      return next(new AppError('Permission denied'));
+      return next(new AppError('Permission denied', 403));
     }
 
     next();
