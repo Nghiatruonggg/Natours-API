@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
@@ -14,6 +15,10 @@ const globalErrorHandler = require('./controllers/errorController');
 
 const app = express();
 
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Global Middlewares
 // Set security HTTP headers
 app.use(helmet());
@@ -26,7 +31,7 @@ if (process.env.NODE_ENV === 'development') {
 const limiter = rateLimit({
   max: 100,
   windowMs: 60 * 60 * 1000,
-  message: 'Too many requests from this IP. Please try again in an hour!',
+  message: 'Too many requests from this IP. Please try again in an hour!'
 });
 
 // Set security limiter
@@ -50,13 +55,10 @@ app.use(
       'ratingsAverage',
       'maxGroupSize',
       'difficulty',
-      'price',
-    ],
-  }),
+      'price'
+    ]
+  })
 );
-
-// Serving static files
-app.use(express.static(`${__dirname}/public`));
 
 // Middleware testing
 app.use((req, res, next) => {
@@ -65,6 +67,9 @@ app.use((req, res, next) => {
 });
 
 // Routes
+app.get('/', (req, res, next) => {
+  res.status(200).render('base');
+});
 
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
