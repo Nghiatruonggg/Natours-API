@@ -8,6 +8,7 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 
 const AppError = require('./utils/AppError');
+const viewRouter = require('./routes/viewRoutes')
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
@@ -67,10 +68,7 @@ app.use((req, res, next) => {
 });
 
 // Routes
-app.get('/', (req, res, next) => {
-  res.status(200).render('base');
-});
-
+app.use('/', viewRouter)
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
