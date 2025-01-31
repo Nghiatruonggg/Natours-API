@@ -3,9 +3,10 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 
 process.on('uncaughtException', (err) => {
+  console.log(err);
   console.log(err.name);
   console.log(err.message);
-  console.log('Uncaught Exceptopm');
+  console.log('Uncaught Exception');
 
   process.exit(1);
 });

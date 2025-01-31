@@ -8,7 +8,7 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 
 const AppError = require('./utils/AppError');
-const viewRouter = require('./routes/viewRoutes')
+const viewRouter = require('./routes/viewRoutes');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
@@ -22,7 +22,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Global Middlewares
 // Set security HTTP headers
-app.use(helmet());
+// TODO: Setup directives specifically for mapbox's url allow
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      reportOnly: true
+    }
+  })
+);
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -68,7 +75,7 @@ app.use((req, res, next) => {
 });
 
 // Routes
-app.use('/', viewRouter)
+app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
