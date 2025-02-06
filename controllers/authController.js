@@ -9,7 +9,7 @@ const sendEmail = require('../utils/email');
 // eslint-disable-next-line arrow-body-style
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
+    expiresIn: process.env.JWT_EXPIRES_IN
   });
 };
 
@@ -18,9 +18,9 @@ const createAndSendToken = (user, statusCode, res) => {
 
   const cookieOption = {
     expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
-    httpOnly: true,
+    httpOnly: true
   };
 
   if (process.env.NODE_ENV === 'production') {
@@ -34,8 +34,8 @@ const createAndSendToken = (user, statusCode, res) => {
     status: 'success',
     token,
     data: {
-      user,
-    },
+      user
+    }
   });
 };
 
@@ -46,7 +46,7 @@ exports.signUp = catchAsync(async (req, res, next) => {
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
     passwordChangedAt: req.body.passwordChangedAt,
-    role: req.body.role,
+    role: req.body.role
   });
 
   createAndSendToken(newUser, 201, res);
@@ -70,6 +70,24 @@ exports.logIn = catchAsync(async (req, res, next) => {
   createAndSendToken(user, 201, res);
 });
 
+exports.logOut = catchAsync(async (req, res, next) => {
+  // Check if cookie exists -> Delete the cookie
+  if (req.cookies) {
+    res.cookie('jwt', 'loggedout', {
+      httpOnly: true,
+      expires: new Date(Date.now() + 10 * 1000)
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: 'You have been logged out!'
+    });
+  }
+
+  // Already logged out
+  next(new AppError('You have already logged out!', 401));
+});
+
 exports.protected = catchAsync(async (req, res, next) => {
   // 1, get token and check if it exists
   let token;
@@ -78,6 +96,8 @@ exports.protected = catchAsync(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
 
   if (!token) {
@@ -96,7 +116,7 @@ exports.protected = catchAsync(async (req, res, next) => {
   if (currentUser.changePasswordAfter(decoded.iat)) {
     return next(
       new AppError('User recently changed the password. Please log in again'),
-      401,
+      401
     );
   }
 
@@ -104,6 +124,36 @@ exports.protected = catchAsync(async (req, res, next) => {
   req.user = currentUser;
   next();
 });
+
+// Only for rendering pages -> No errs
+exports.isLoggedIn = async (req, res, next) => {
+  if (req.cookies.jwt) {
+    try {
+      // 2, verify the token
+      const decoded = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET
+      );
+
+      // 3, check if users still exist
+      const currentUser = await UserModel.findById(decoded.id);
+      if (!currentUser) return next();
+
+      // 4, check if user changed password after JWT was issued
+      if (currentUser.changePasswordAfter(decoded.iat)) {
+        return next();
+      }
+
+      // There is a logged in user
+      res.locals.user = currentUser;
+      return next();
+    } catch (err) {
+      return next();
+    }
+  }
+
+  next();
+};
 
 // eslint-disable-next-line arrow-body-style
 exports.restrictedTo = (...roles) => {
@@ -136,7 +186,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     await sendEmail({
       email: req.body.email,
       subject: 'Your password reset token',
-      message,
+      message
     });
   } catch (error) {
     user.passwordResetToken = undefined;
@@ -159,8 +209,8 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   const user = await UserModel.findOne({
     passwordResetToken: hashToken,
     passwordResetExpires: {
-      $gt: Date.now(),
-    },
+      $gt: Date.now()
+    }
   });
 
   // If token has not expired and user exists, set the new password
@@ -188,12 +238,12 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   // 2, Check if posted password is correct
   const isCorrected = await currentUser.correctPassword(
     req.body.oldPassword,
-    currentUser.password,
+    currentUser.password
   );
 
   if (!isCorrected)
     return next(
-      new AppError('Your old password is incorrect! Please try again', 400),
+      new AppError('Your old password is incorrect! Please try again', 400)
     );
 
   // 3, If correct, set new password

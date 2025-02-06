@@ -3,16 +3,24 @@
   "version": "1.0.0",
   "description": "Learning Node-Express-MongoDB",
   "main": "app.js",
+  "targets": {
+    "main": false
+  },
   "scripts": {
     "start:dev": "nodemon server.js",
     "start:prod": "NODE_ENV=production nodemon server.js",
     "debug": "node --inspect-brk ./server.js",
+    "start": "parcel serve ./public/js/index.js --dist-dir ./public/js/bundled",
+    "build": "parcel build ./public/js/index.js --dist-dir ./public/js/bundled",
     "pretty": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\""
   },
   "author": "NghiaTruong",
   "license": "ISC",
   "dependencies": {
+    "@babel/polyfill": "^7.12.1",
+    "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "express-mongo-sanitize": "^2.2.0",
@@ -29,6 +37,7 @@
     "xss-clean": "^0.1.4"
   },
   "devDependencies": {
+    "buffer": "^6.0.3",
     "eslint": "^8.57.1",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^9.1.0",
@@ -37,7 +46,9 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-react": "^7.37.2",
-    "prettier": "^3.3.3"
+    "parcel": "^2.13.3",
+    "prettier": "^3.3.3",
+    "process": "^0.11.10"
   },
   "engines": {
     "node": ">=10.0.0"
