@@ -17,33 +17,63 @@ const handleValidationErrorDB = (err) => {
   return new AppError(errorMessage, 400);
 };
 
-const handleJWTError = () => new AppError('Invalid token. Please login again', 401);
+const handleJWTError = () =>
+  new AppError('Invalid token. Please login again', 401);
 
-const handleTokenExpiredError = () => new AppError('Token expired. Please login again', 401);
+const handleTokenExpiredError = () =>
+  new AppError('Token expired. Please login again', 401);
 
-const sendErrorDev = (err, res) => {
-  res.status(err.statusCode).json({
-    status: err.statusCode,
-    error: err,
-    message: err.message,
-    stack: err.stack,
-  });
-};
-
-const sendErrorProd = (err, res) => {
-  if (err.isOperational) {
+const sendErrorDev = (err, req, res) => {
+  // API
+  if (req.originalUrl.startsWith('/api')) {
     res.status(err.statusCode).json({
       status: err.statusCode,
+      error: err,
       message: err.message,
+      stack: err.stack
     });
   } else {
+    // Render view
+    console.error(err);
+    res.status(err.statusCode).render('error', {
+      title: 'Something went wrong :(',
+      msg: err.message
+    });
+  }
+};
+
+const sendErrorProd = (err, req, res) => {
+  if (req.originalUrl.startsWith('/api')) {
+    // API
+    if (err.isOperational) {
+      return res.status(err.statusCode).json({
+        status: err.statusCode,
+        message: err.message
+      });
+    }
     // Log the error
     console.error(err);
 
     // Send the res
-    res.status(500).json({
+    return res.status(500).json({
       status: 'error',
-      message: 'Something went wrong',
+      message: 'Something went wrong'
+    });
+  } else {
+    // Render view
+    if (err.isOperational) {
+      return res.status(err.statusCode).render('error', {
+        title: 'Something went wrong :(',
+        msg: err.message
+      });
+    }
+    // Log the error
+    console.error(err);
+
+    // Send the res
+    return res.status(err.statusCode).render('error', {
+      title: 'Something went wrong :(',
+      msg: 'Please try again later'
     });
   }
 };
@@ -53,10 +83,12 @@ module.exports = (err, req, res, next) => {
   err.status = err.status || 'error';
 
   if (process.env.NODE_ENV === 'development') {
-    sendErrorDev(err, res);
-  } else if (process.env.NODE_ENV === 'production') {
-    let error = { ...err, name: err.name };
+    sendErrorDev(err, req, res);
+  }
 
+  // Windows issue: need trimming
+  if (process.env.NODE_ENV.trim() === 'production') {
+    let error = { ...err, message: err.message, name: err.name };
     if (error.name === 'CastError') {
       error = handleCastErrorDB(error);
     }
@@ -70,13 +102,12 @@ module.exports = (err, req, res, next) => {
     }
 
     if (error.name === 'JsonWebTokenError') {
-      error = handleJWTError()
+      error = handleJWTError();
     }
 
     if (error.name === 'TokenExpiredError') {
-      error = handleTokenExpiredError()
+      error = handleTokenExpiredError();
     }
-
-    sendErrorProd(error, res);
+    sendErrorProd(error, req, res);
   }
 };

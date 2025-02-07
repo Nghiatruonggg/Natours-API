@@ -78,14 +78,14 @@ exports.logOut = catchAsync(async (req, res, next) => {
       expires: new Date(Date.now() + 10 * 1000)
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       status: 'success',
       data: 'You have been logged out!'
     });
   }
 
   // Already logged out
-  next(new AppError('You have already logged out!', 401));
+  return next(new AppError('You have already logged out!', 401));
 });
 
 exports.protected = catchAsync(async (req, res, next) => {

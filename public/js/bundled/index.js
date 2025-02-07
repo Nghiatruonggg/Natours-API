@@ -615,7 +615,7 @@ if (loginForm) loginForm.addEventListener('submit', (e)=>{
 });
 if (logoutButton) logoutButton.addEventListener('click', (0, _auth.logout));
 
-},{"@babel/polyfill":"dTCHC","./mapbox":"3zDlz","./auth":"fov0Z"}],"dTCHC":[function(require,module,exports,__globalThis) {
+},{"@babel/polyfill":"dTCHC","./auth":"fov0Z","./mapbox":"3zDlz"}],"dTCHC":[function(require,module,exports,__globalThis) {
 "use strict";
 require("f50de0aa433a589b");
 var _global = _interopRequireDefault(require("4142986752a079d4"));
@@ -7598,77 +7598,6 @@ module.exports = function(it, key) {
     return hasOwnProperty.call(it, key);
 };
 
-},{}],"3zDlz":[function(require,module,exports,__globalThis) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "displayMap", ()=>displayMap);
-const displayMap = (locations)=>{
-    mapboxgl.accessToken = 'pk.eyJ1IjoibmdoaWF0cnVvbmcxMTA3MDAiLCJhIjoiY202ZzVrYXg0MGIyMTJqczlveHE5eDh2ZSJ9.wsOs5Tr2fsGW4b1k0a37aw';
-    const map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/nghiatruong110700/cm6kilwjs00kh01pbatf94v0v',
-        zoomScroll: false,
-        boxZoom: false
-    });
-    const bounds = new mapboxgl.LngLatBounds();
-    locations.forEach((loc)=>{
-        // Create marker
-        const el = document.createElement('div');
-        el.className = 'marker';
-        // Add marker
-        new mapboxgl.Marker({
-            element: el,
-            anchor: 'bottom'
-        }).setLngLat(loc.coordinates).addTo(map);
-        new mapboxgl.Popup({
-            offset: 30
-        }).setLngLat(loc.coordinates).setHTML(`<p>Day ${loc.day}: ${loc.description}</p>`).addTo(map);
-        // Extend map bounds to include current location
-        bounds.extend(loc.coordinates);
-    });
-    // Locate + Zoom into the bounds
-    map.fitBounds(bounds, {
-        padding: {
-            top: 200,
-            bottom: 150,
-            left: 100,
-            right: 100
-        }
-    });
-    // disable map zoom when using scroll
-    map.scrollZoom.disable();
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gkKU3":[function(require,module,exports,__globalThis) {
-exports.interopDefault = function(a) {
-    return a && a.__esModule ? a : {
-        default: a
-    };
-};
-exports.defineInteropFlag = function(a) {
-    Object.defineProperty(a, '__esModule', {
-        value: true
-    });
-};
-exports.exportAll = function(source, dest) {
-    Object.keys(source).forEach(function(key) {
-        if (key === 'default' || key === '__esModule' || Object.prototype.hasOwnProperty.call(dest, key)) return;
-        Object.defineProperty(dest, key, {
-            enumerable: true,
-            get: function() {
-                return source[key];
-            }
-        });
-    });
-    return dest;
-};
-exports.export = function(dest, destName, get) {
-    Object.defineProperty(dest, destName, {
-        enumerable: true,
-        get: get
-    });
-};
-
 },{}],"fov0Z":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
@@ -8570,7 +8499,37 @@ function bind(fn, thisArg) {
     };
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"cpqD8":[function(require,module,exports,__globalThis) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gkKU3":[function(require,module,exports,__globalThis) {
+exports.interopDefault = function(a) {
+    return a && a.__esModule ? a : {
+        default: a
+    };
+};
+exports.defineInteropFlag = function(a) {
+    Object.defineProperty(a, '__esModule', {
+        value: true
+    });
+};
+exports.exportAll = function(source, dest) {
+    Object.keys(source).forEach(function(key) {
+        if (key === 'default' || key === '__esModule' || Object.prototype.hasOwnProperty.call(dest, key)) return;
+        Object.defineProperty(dest, key, {
+            enumerable: true,
+            get: function() {
+                return source[key];
+            }
+        });
+    });
+    return dest;
+};
+exports.export = function(dest, destName, get) {
+    Object.defineProperty(dest, destName, {
+        enumerable: true,
+        get: get
+    });
+};
+
+},{}],"cpqD8":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _utilsJs = require("./../utils.js");
@@ -12644,6 +12603,47 @@ const showAlert = (type, msg)=>{
     const markup = `<div class="alert alert--${type}">${msg}</div>`;
     document.querySelector('body').insertAdjacentHTML('afterbegin', markup);
     setTimeout(hideAlert, 5000);
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3zDlz":[function(require,module,exports,__globalThis) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "displayMap", ()=>displayMap);
+const displayMap = (locations)=>{
+    mapboxgl.accessToken = 'pk.eyJ1IjoibmdoaWF0cnVvbmcxMTA3MDAiLCJhIjoiY202ZzVrYXg0MGIyMTJqczlveHE5eDh2ZSJ9.wsOs5Tr2fsGW4b1k0a37aw';
+    const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/nghiatruong110700/cm6kilwjs00kh01pbatf94v0v',
+        zoomScroll: false,
+        boxZoom: false
+    });
+    const bounds = new mapboxgl.LngLatBounds();
+    locations.forEach((loc)=>{
+        // Create marker
+        const el = document.createElement('div');
+        el.className = 'marker';
+        // Add marker
+        new mapboxgl.Marker({
+            element: el,
+            anchor: 'bottom'
+        }).setLngLat(loc.coordinates).addTo(map);
+        new mapboxgl.Popup({
+            offset: 30
+        }).setLngLat(loc.coordinates).setHTML(`<p>Day ${loc.day}: ${loc.description}</p>`).addTo(map);
+        // Extend map bounds to include current location
+        bounds.extend(loc.coordinates);
+    });
+    // Locate + Zoom into the bounds
+    map.fitBounds(bounds, {
+        padding: {
+            top: 200,
+            bottom: 150,
+            left: 100,
+            right: 100
+        }
+    });
+    // disable map zoom when using scroll
+    map.scrollZoom.disable();
 };
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["fsLyU","f2QDv"], "f2QDv", "parcelRequire94c2")
