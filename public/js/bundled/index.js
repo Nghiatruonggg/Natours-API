@@ -619,12 +619,11 @@ if (loginForm) loginForm.addEventListener('submit', (e)=>{
 if (logoutButton) logoutButton.addEventListener('click', (0, _auth.logout));
 if (updatedUserForm) updatedUserForm.addEventListener('submit', (e)=>{
     e.preventDefault();
-    const name = document.querySelector('#name').value;
-    const email = document.querySelector('#email').value;
-    (0, _updateSettings.updateSettings)({
-        name,
-        email
-    }, 'data');
+    const form = new FormData();
+    form.append('name', document.querySelector('#name').value);
+    form.append('email', document.querySelector('#email').value);
+    form.append('photo', document.querySelector('#photo').files[0]);
+    (0, _updateSettings.updateSettings)(form, 'data');
 });
 if (userPasswordForm) userPasswordForm.addEventListener('submit', async (e)=>{
     e.preventDefault();
@@ -12685,6 +12684,7 @@ var _axios = require("axios");
 var _axiosDefault = parcelHelpers.interopDefault(_axios);
 var _alert = require("./alert");
 const updateSettings = async (data, type)=>{
+    console.log(data);
     try {
         const url = type === 'password' ? 'http://localhost:3000/api/v1/users/update-password/' : 'http://localhost:3000/api/v1/users/update-me';
         const res = await (0, _axiosDefault.default)({
