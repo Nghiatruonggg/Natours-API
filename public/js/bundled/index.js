@@ -599,10 +599,13 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 var _polyfill = require("@babel/polyfill");
 var _auth = require("./auth");
 var _mapbox = require("./mapbox");
+var _updateSettings = require("./updateSettings");
 // DOM Elements
-const loginForm = document.querySelector('.form');
+const loginForm = document.querySelector('.form--login');
 const mapBox = document.getElementById('map');
 const logoutButton = document.getElementById('logout-function');
+const updatedUserForm = document.querySelector('.form-user-data');
+const userPasswordForm = document.querySelector('.form-user-password');
 if (mapBox) {
     const locations = JSON.parse(mapBox.dataset.locations);
     (0, _mapbox.displayMap)(locations);
@@ -614,8 +617,33 @@ if (loginForm) loginForm.addEventListener('submit', (e)=>{
     (0, _auth.login)(email, password);
 });
 if (logoutButton) logoutButton.addEventListener('click', (0, _auth.logout));
+if (updatedUserForm) updatedUserForm.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const name = document.querySelector('#name').value;
+    const email = document.querySelector('#email').value;
+    (0, _updateSettings.updateSettings)({
+        name,
+        email
+    }, 'data');
+});
+if (userPasswordForm) userPasswordForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    document.querySelector('.btn--save-password').innerHTML = 'Updating';
+    const oldPassword = document.querySelector('#password-current').value;
+    const newPassword = document.querySelector('#password').value;
+    const confirmedPassword = document.querySelector('#password-confirm').value;
+    await (0, _updateSettings.updateSettings)({
+        oldPassword,
+        newPassword,
+        confirmedPassword
+    }, 'password');
+    document.querySelector('.btn--save-password').innerHTML = 'Save password';
+    document.querySelector('#password-current').value = '';
+    document.querySelector('#password').value = '';
+    document.querySelector('#password-confirm').value = '';
+});
 
-},{"@babel/polyfill":"dTCHC","./auth":"fov0Z","./mapbox":"3zDlz"}],"dTCHC":[function(require,module,exports,__globalThis) {
+},{"@babel/polyfill":"dTCHC","./auth":"fov0Z","./mapbox":"3zDlz","./updateSettings":"l3cGY"}],"dTCHC":[function(require,module,exports,__globalThis) {
 "use strict";
 require("f50de0aa433a589b");
 var _global = _interopRequireDefault(require("4142986752a079d4"));
@@ -7634,7 +7662,10 @@ const logout = async ()=>{
         });
         if (res.data.status === 'success') {
             (0, _alert.showAlert)('success', 'Logged out successfully!');
-            setTimeout(()=>{
+            if (location.pathname.startsWith('/me')) return setTimeout(()=>{
+                location.assign('/');
+            }, 1000);
+            else return setTimeout(()=>{
                 location.reload(true);
             }, 1000);
         }
@@ -12646,6 +12677,27 @@ const displayMap = (locations)=>{
     map.scrollZoom.disable();
 };
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["fsLyU","f2QDv"], "f2QDv", "parcelRequire94c2")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"l3cGY":[function(require,module,exports,__globalThis) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "updateSettings", ()=>updateSettings);
+var _axios = require("axios");
+var _axiosDefault = parcelHelpers.interopDefault(_axios);
+var _alert = require("./alert");
+const updateSettings = async (data, type)=>{
+    try {
+        const url = type === 'password' ? 'http://localhost:3000/api/v1/users/update-password/' : 'http://localhost:3000/api/v1/users/update-me';
+        const res = await (0, _axiosDefault.default)({
+            method: 'PATCH',
+            url,
+            data
+        });
+        if (res.data.status === 'success') (0, _alert.showAlert)('success', `${type.toUpperCase()} updated successfully!`);
+    } catch (error) {
+        (0, _alert.showAlert)('error', `${error.response.data.message}`);
+    }
+};
+
+},{"axios":"jo6P5","./alert":"kxdiQ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["fsLyU","f2QDv"], "f2QDv", "parcelRequire94c2")
 
 //# sourceMappingURL=index.js.map

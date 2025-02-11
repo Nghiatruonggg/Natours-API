@@ -7,7 +7,8 @@ const {
   deleteUser,
   updateMe,
   deleteMe,
-  getMe
+  getMe,
+  uploadUserPhoto
 } = require('../controllers/userController');
 const {
   protected,
@@ -28,7 +29,7 @@ router.patch('/reset-password/:token', resetPassword);
 
 router.use(protected);
 router.patch('/update-password/', updatePassword);
-router.patch('/update-me', updateMe);
+router.patch('/update-me', uploadUserPhoto, updateMe);
 router.delete('/delete-me', deleteMe);
 router.get('/me', getMe, getUser);
 

@@ -121,6 +121,7 @@ exports.protected = catchAsync(async (req, res, next) => {
   }
 
   // Grant access to the protected routes
+  res.locals.user = currentUser;
   req.user = currentUser;
   next();
 });
@@ -248,7 +249,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 
   // 3, If correct, set new password
   currentUser.password = req.body.newPassword;
-  currentUser.passwordConfirm = req.body.confirmedNewPassword;
+  currentUser.passwordConfirm = req.body.confirmedPassword;
   await currentUser.save({ validateModifiedOnly: true });
 
   // 4, log the user in + send JWT token

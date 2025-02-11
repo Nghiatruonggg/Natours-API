@@ -1,3 +1,4 @@
+const multer = require('multer');
 const userModel = require('../models/userModel');
 const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
@@ -6,8 +7,35 @@ const {
   updateOne,
   createOne,
   getAll,
-  getOne,
+  getOne
 } = require('../utils/factoryFunction');
+
+const multerStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'public/img/users');
+  },
+  filename: (req, file, cb) => {
+    //user-userId-timestamp.extension
+    const ext = file.mimetype.split('/')[1];
+    cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
+  }
+});
+
+// Filter if the file is image or not
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Not an image! Please upload only images', 404), false);
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter
+});
+
+exports.uploadUserPhoto = upload.single('photo');
 
 const filteredFields = (obj, ...allowedFields) => {
   const newObject = {};
@@ -35,6 +63,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 
   // Filter out the unwanted fields
   const filterBody = filteredFields(req.body, 'name', 'email');
+  if (req.file) filterBody.photo = req.file.filename;
 
   // Update the user's data
   const currentUser = await userModel.findByIdAndUpdate(
@@ -42,15 +71,15 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     filterBody,
     {
       runValidators: true,
-      new: true,
-    },
+      new: true
+    }
   );
 
   res.status(200).json({
     status: 'success',
     data: {
-      user: currentUser,
-    },
+      user: currentUser
+    }
   });
 });
 
@@ -62,13 +91,13 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 
   res.status(204).json({
     status: 'success',
-    data: null,
+    data: null
   });
 });
 
 exports.getMe = (req, res, next) => {
   req.params.id = req.user.id;
-  next()
-}
+  next();
+};
 
 exports.deleteUser = deleteOne(userModel);

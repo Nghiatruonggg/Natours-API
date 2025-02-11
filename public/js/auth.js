@@ -32,9 +32,15 @@ export const logout = async () => {
 
     if (res.data.status === 'success') {
       showAlert('success', 'Logged out successfully!');
-      setTimeout(() => {
-        location.reload(true);
-      }, 1000);
+      if (location.pathname.startsWith('/me')) {
+        return setTimeout(() => {
+          location.assign('/');
+        }, 1000);
+      } else {
+        return setTimeout(() => {
+          location.reload(true);
+        }, 1000);
+      }
     }
   } catch (error) {
     console.log(error);
