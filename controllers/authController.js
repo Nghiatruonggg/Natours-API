@@ -4,7 +4,7 @@ const { promisify } = require('util');
 const UserModel = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
-const sendEmail = require('../utils/email');
+const Email = require('../utils/email');
 
 // eslint-disable-next-line arrow-body-style
 const signToken = (id) => {
@@ -48,6 +48,10 @@ exports.signUp = catchAsync(async (req, res, next) => {
     passwordChangedAt: req.body.passwordChangedAt,
     role: req.body.role
   });
+
+  const url = `${req.protocol}://${req.get('host')}/me`;
+
+  await new Email(newUser, url).sendWelcome();
 
   createAndSendToken(newUser, 201, res);
 });
@@ -184,10 +188,11 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   const message = `Forgot your password? Click on the link: ${resetUrl} and start changing!`;
 
   try {
-    await sendEmail({
-      email: req.body.email,
-      subject: 'Your password reset token',
-      message
+    await new Email(user, resetUrl).sendForgotPassword();
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Token sent to the email!'
     });
   } catch (error) {
     user.passwordResetToken = undefined;
@@ -196,8 +201,6 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 
     return next(new AppError('There was an error sending the email!', 500));
   }
-
-  createAndSendToken(user, 201, res);
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {

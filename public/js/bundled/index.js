@@ -7633,11 +7633,12 @@ parcelHelpers.export(exports, "logout", ()=>logout);
 var _axios = require("axios");
 var _axiosDefault = parcelHelpers.interopDefault(_axios);
 var _alert = require("./alert");
+const host = location.host;
 const login = async (email, password)=>{
     try {
         const res = await (0, _axiosDefault.default)({
             method: 'POST',
-            url: 'http://localhost:3000/api/v1/users/login',
+            url: `http://${host}/api/v1/users/login`,
             data: {
                 email,
                 password
@@ -7657,7 +7658,7 @@ const logout = async ()=>{
     try {
         const res = await (0, _axiosDefault.default)({
             method: 'GET',
-            url: 'http://localhost:3000/api/v1/users/logout'
+            url: `http://${host}/api/v1/users/logout`
         });
         if (res.data.status === 'success') {
             (0, _alert.showAlert)('success', 'Logged out successfully!');
