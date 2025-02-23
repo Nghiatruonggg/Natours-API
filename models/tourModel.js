@@ -122,6 +122,12 @@ tourSchema.virtual('reviews', {
   localField: '_id'
 });
 
+tourSchema.virtual('booking', {
+  ref: 'Bookings',
+  foreignField: 'tour',
+  localField: '_id'
+});
+
 // Document middleware: runs before .save() and create()
 // tourSchema.index({price: 1})
 tourSchema.index({ price: 1, ratingsAverage: -1 });
