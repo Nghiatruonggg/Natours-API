@@ -2,6 +2,13 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Tour = require('../models/tourModel');
 const Booking = require('../models/bookingsModel');
 const catchAsync = require('../utils/catchAsync');
+const {
+  getAll,
+  createOne,
+  getOne,
+  updateOne,
+  deleteOne
+} = require('../utils/factoryFunction');
 
 exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   // Get the current tour
@@ -46,3 +53,28 @@ exports.createBookingCheckout = catchAsync(async (req, res, next) => {
 
   res.redirect(req.originalUrl.split('?')[0]);
 });
+
+// exports.getBooking = catchAsync(async (req, res, next) => {
+//   const getTour = new APIFeatures(Tour, req.query)
+//     .filter()
+//     .sort()
+//     .limitFields()
+//     .paginate()
+//     .matchUser({ path: 'booking', match: { user: req.user.id } });
+
+//   const unfilteredBooking = await getTour.query;
+//   const booking = unfilteredBooking.filter((tour) => tour.booking.length > 0);
+
+//   res.status(200).json({
+//     status: 'success',
+//     data: {
+//       booking
+//     }
+//   });
+// });
+
+exports.getBookings = getAll(Booking, 'booking');
+exports.createBooking = createOne(Booking, 'booking');
+exports.getOneBooking = getOne(Booking);
+exports.editBooking = updateOne(Booking, 'updatedBooking');
+exports.deleteBooking = deleteOne(Booking);

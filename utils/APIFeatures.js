@@ -11,7 +11,10 @@ class APIFeatures {
 
     // 1b, Advanced Filtering
     let filterStr = JSON.stringify(filterObject);
-    filterStr = filterStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+    filterStr = filterStr.replace(
+      /\b(gte|gt|lte|lt)\b/g,
+      (match) => `$${match}`
+    );
 
     this.query = this.query.find(JSON.parse(filterStr));
 
@@ -46,6 +49,12 @@ class APIFeatures {
     const skip = (page - 1) * limit;
     // page=2&limit=4
     this.query = this.query.skip(skip).limit(limit);
+
+    return this;
+  }
+
+  matchUser(options) {
+    this.query = this.query.populate(options);
 
     return this;
   }

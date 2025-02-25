@@ -7,6 +7,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
+const compression = require('compression');
 
 const AppError = require('./utils/AppError');
 const viewRouter = require('./routes/viewRoutes');
@@ -71,6 +72,9 @@ app.use(
     ]
   })
 );
+
+// Compress all the text that is sent to the client
+app.use(compression());
 
 // Middleware testing
 app.use((req, res, next) => {
