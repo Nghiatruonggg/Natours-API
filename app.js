@@ -8,6 +8,7 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
+const cors = require('cors');
 
 const AppError = require('./utils/AppError');
 const viewRouter = require('./routes/viewRoutes');
@@ -25,6 +26,16 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Global Middlewares
+// Implement CORS
+app.use(cors());
+// Access-Control-Allow-Origin *
+
+// app.use(cors({
+//   origin: 'https://123.com/'
+// }));
+
+app.options('*', cors());
+
 // Set security HTTP headers
 // TODO: Setup directives specifically for mapbox's url allow
 app.use(
