@@ -13,20 +13,16 @@ const signToken = (id) => {
   });
 };
 
-const createAndSendToken = (user, statusCode, res) => {
+const createAndSendToken = (user, statusCode, req, res) => {
   const token = signToken(user._id);
 
-  const cookieOption = {
+  res.cookie('jwt', token, {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
-    httpOnly: true
-  };
-
-  if (process.env.NODE_ENV === 'production') {
-    cookieOption.secure = true;
-  }
-  res.cookie('jwt', token, cookieOption);
+    httpOnly: true,
+    secure: req.secure
+  });
 
   user.password = undefined;
 
@@ -53,7 +49,7 @@ exports.signUp = catchAsync(async (req, res, next) => {
 
   await new Email(newUser, url).sendWelcome();
 
-  createAndSendToken(newUser, 201, res);
+  createAndSendToken(newUser, 201, req, res);
 });
 
 exports.logIn = catchAsync(async (req, res, next) => {
@@ -71,7 +67,7 @@ exports.logIn = catchAsync(async (req, res, next) => {
   }
 
   // Sign new JWT token and send them back
-  createAndSendToken(user, 201, res);
+  createAndSendToken(user, 201, req, res);
 });
 
 exports.logOut = catchAsync(async (req, res, next) => {
@@ -228,7 +224,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   // update changedPasswordAt property for the user in userModel
 
   // Log the user in, send JWT
-  createAndSendToken(user, 201, res);
+  createAndSendToken(user, 201, req, res);
 });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
@@ -256,7 +252,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   await currentUser.save({ validateModifiedOnly: true });
 
   // 4, log the user in + send JWT token
-  createAndSendToken(currentUser, 201, res);
+  createAndSendToken(currentUser, 201, req, res);
 });
 
 exports.ownerCheck = ({ model, ownerFields }, ...roles) =>
