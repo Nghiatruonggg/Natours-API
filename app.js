@@ -17,6 +17,7 @@ const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const bookingRouter = require('./routes/bookingRoute');
 const globalErrorHandler = require('./controllers/errorController');
+const { webhookCheckout } = require('./controllers/bookingController');
 
 const app = express();
 app.enable('trust proxy');
@@ -59,6 +60,12 @@ const limiter = rateLimit({
 
 // Set security limiter
 app.use('/api', limiter);
+
+app.post(
+  '/webhook-checkout',
+  express.raw({ type: 'application/json' }),
+  webhookCheckout
+);
 
 // Body parser to json for req.body
 app.use(express.json({ limit: '10kb' }));
