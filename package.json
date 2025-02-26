@@ -2,16 +2,16 @@
   "name": "natours",
   "version": "1.0.0",
   "description": "Learning Node-Express-MongoDB",
-  "main": "app.js",
   "targets": {
     "main": false
   },
+  "browserslist": "> 0.5%, last 2 versions, not dead",
   "scripts": {
     "start:dev": "nodemon server.js",
     "start:prod": "NODE_ENV=production nodemon server.js",
     "start:prod-win": "SET NODE_ENV=production & nodemon server.js",
     "debug": "node --inspect-brk ./server.js",
-    "start": "parcel serve ./public/js/index.js --dist-dir ./public/js/bundled",
+    "start": "parcel watch ./public/js/index.js --dist-dir ./public/js/bundled",
     "build": "parcel build ./public/js/index.js --dist-dir ./public/js/bundled",
     "pretty": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\""
   },
