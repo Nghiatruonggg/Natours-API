@@ -50,7 +50,7 @@ exports.getAccount = catchAsync(async (req, res, next) => {
 exports.getMyTours = catchAsync(async (req, res, next) => {
   // // Find all bookings related to the user
   // const bookings = await Booking.find({ user: req.user.id });
-  
+
   // // Find tours with the returned IDs
   // const tourIDs = bookings.map((el) => el.tour);
 
@@ -87,3 +87,13 @@ exports.updateUserData = catchAsync(async (req, res, next) => {
     user: updatedUser
   });
 });
+
+exports.alerts = (req, res, next) => {
+  const { alert } = req.query;
+  if (alert === 'booking') {
+    res.locals.alert =
+      'Booking successed! Please check your email for confirmation. If the booking does not show up, please check later.';
+  }
+
+  next();
+};
